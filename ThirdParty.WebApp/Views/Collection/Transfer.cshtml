@@ -1,0 +1,116 @@
+@model ThirdParty.WebApp.Models.ViewModels.TransferViewModel
+@{
+    ViewData["Title"] = "Transfer Collected Funds to NWSDB";
+}
+
+<!-- Workflow Pipeline -->
+<div class="pipeline-steps">
+    <div class="step-item completed">
+        <span class="step-number"><i class="bi bi-check"></i></span>
+        <span>Search Customer</span>
+    </div>
+    <div class="step-item completed">
+        <span class="step-number"><i class="bi bi-check"></i></span>
+        <span>Verify Bill</span>
+    </div>
+    <div class="step-item completed">
+        <span class="step-number"><i class="bi bi-check"></i></span>
+        <span>Collect Cash / Card</span>
+    </div>
+    <div class="step-item active">
+        <span class="step-number">4</span>
+        <span>Transfer to NWSDB</span>
+    </div>
+</div>
+
+<div class="row justify-content-center my-4">
+    <div class="col-md-7">
+        <div class="agent-card text-center">
+            <div class="alert alert-success border-0 bg-success-subtle text-success p-3 rounded-3 mb-4">
+                <h4 class="fw-bold mb-1"><i class="bi bi-check-circle-fill me-2"></i>Payment Collected Successfully!</h4>
+                <small>Funds collected from customer via @Model?.PaymentMethod. Counter collection status is <strong>@Model?.CollectionStatus</strong>.</small>
+            </div>
+
+            <i class="bi bi-send-check text-cyan display-3 mb-3"></i>
+            <h3 class="fw-bold">Ready to Transfer Collected Amount</h3>
+            <p class="text-muted">Review the collected payment summary before executing settlement transfer to <strong>NWSDB.Api</strong>.</p>
+
+            @if (!string.IsNullOrEmpty(Model?.ErrorMessage))
+            {
+                <div class="alert alert-danger text-start rounded-3" role="alert">
+                    <i class="bi bi-exclamation-octagon-fill me-2"></i> @Model.ErrorMessage
+                </div>
+            }
+
+            <div class="p-4 bg-dark border border-secondary rounded-3 text-start my-4">
+                <div class="row mb-2">
+                    <span class="col-6 text-muted">Collection Record ID:</span>
+                    <strong class="col-6 text-end font-monospace text-warning">#@Model?.CollectionId</strong>
+                </div>
+                <div class="row mb-2">
+                    <span class="col-6 text-muted">Customer Account:</span>
+                    <strong class="col-6 text-end text-light">@Model?.CustomerName (@Model?.AccountNumber)</strong>
+                </div>
+                <div class="row mb-2">
+                    <span class="col-6 text-muted">Bill Statement #:</span>
+                    <strong class="col-6 text-end font-monospace text-info">@Model?.BillNumber</strong>
+                </div>
+                <div class="row mb-2">
+                    <span class="col-6 text-muted">Collection Method:</span>
+                    <span class="col-6 text-end font-monospace fw-bold text-cyan">@Model?.PaymentMethod</span>
+                </div>
+                <div class="row mb-2">
+                    <span class="col-6 text-muted">Collection Status:</span>
+                    <span class="col-6 text-end"><span class="badge bg-success text-white">@Model?.CollectionStatus</span></span>
+                </div>
+                <div class="row mb-2">
+                    <span class="col-6 text-muted">Transfer Status:</span>
+                    <span class="col-6 text-end"><span class="badge bg-warning text-dark">@Model?.TransferStatus</span></span>
+                </div>
+                @if (!string.IsNullOrEmpty(Model?.BankTransactionId))
+                {
+                    <div class="row mb-2">
+                        <span class="col-6 text-muted">Bank Txn Ref:</span>
+                        <span class="col-6 text-end font-monospace text-success">@Model.BankTransactionId</span>
+                    </div>
+                }
+                <div class="row mb-2">
+                    <span class="col-6 text-muted">Counter Agent ID:</span>
+                    <span class="col-6 text-end font-monospace">@Model?.CollectorId</span>
+                </div>
+                <div class="row mb-2">
+                    <span class="col-6 text-muted">Collection Timestamp:</span>
+                    <span class="col-6 text-end">@Model?.CollectionTimestamp.ToString("yyyy-MM-dd HH:mm:ss")</span>
+                </div>
+                <hr class="border-secondary" />
+                <div class="row fs-4 fw-bold">
+                    <span class="col-6 text-light">Total Amount Collected:</span>
+                    <strong class="col-6 text-end text-warning">Rs. @(Model?.CollectedAmount.ToString("N2"))</strong>
+                </div>
+            </div>
+
+            <div class="alert alert-info border-0 bg-dark text-info text-start rounded-3 mb-4">
+                <small><i class="bi bi-info-circle me-1"></i> Clicking <strong>"Transfer to NWSDB"</strong> sends an HTTP REST request with <strong>CollectionId (#@Model?.CollectionId)</strong> from <strong>ThirdParty.WebApp</strong> &rarr; <strong>NWSDB.Api</strong> to settle the collection into NWSDB and update the customer's bill. <em>(Bank.Api is NOT called during transfer because funds were already collected in Stage 1).</em></small>
+            </div>
+
+            <form asp-action="TransferSubmit" method="post">
+                <input type="hidden" asp-for="CollectionId" />
+                <input type="hidden" asp-for="BillNumber" />
+                <input type="hidden" asp-for="AccountNumber" />
+                <input type="hidden" asp-for="CustomerName" />
+                <input type="hidden" asp-for="CollectedAmount" />
+                <input type="hidden" asp-for="PaymentMethod" />
+                <input type="hidden" asp-for="CollectorId" />
+                <input type="hidden" asp-for="BankTransactionId" />
+                <input type="hidden" asp-for="CollectionStatus" />
+                <input type="hidden" asp-for="TransferStatus" />
+                <div class="d-flex justify-content-between align-items-center">
+                    <a asp-action="Collect" asp-route-billNumber="@Model?.BillNumber" class="btn btn-outline-secondary">Back to Collection</a>
+                    <button type="submit" class="btn btn-tp-transfer">
+                        <i class="bi bi-send-fill me-2"></i> Transfer to NWSDB Now
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

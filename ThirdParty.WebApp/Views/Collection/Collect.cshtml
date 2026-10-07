@@ -1,0 +1,162 @@
+@model ThirdParty.WebApp.Models.ViewModels.PaymentCollectionViewModel
+@{
+    ViewData["Title"] = "Collect Customer Payment (Cash or Card)";
+}
+
+<!-- Workflow Pipeline -->
+<div class="pipeline-steps">
+    <div class="step-item completed">
+        <span class="step-number"><i class="bi bi-check"></i></span>
+        <span>Search Customer</span>
+    </div>
+    <div class="step-item completed">
+        <span class="step-number"><i class="bi bi-check"></i></span>
+        <span>Verify Bill</span>
+    </div>
+    <div class="step-item active">
+        <span class="step-number">3</span>
+        <span>Collect Cash / Card</span>
+    </div>
+    <div class="step-item">
+        <span class="step-number">4</span>
+        <span>Transfer to NWSDB</span>
+    </div>
+</div>
+
+<div class="row justify-content-center my-4">
+    <div class="col-md-7">
+        <div class="agent-card">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary">
+                <div>
+                    <h3 class="fw-bold mb-0"><i class="bi bi-wallet2 text-info me-2"></i>Counter Payment Collection</h3>
+                    <small class="text-muted">Collect payment via CASH or CARD from Customer</small>
+                </div>
+                <span class="badge bg-secondary p-2">AGENT-5501</span>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger rounded-3" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> @Model.ErrorMessage
+                </div>
+            }
+
+            <div class="p-3 bg-dark border border-secondary rounded-3 mb-4">
+                <div class="row">
+                    <div class="col-6">
+                        <small class="text-muted text-uppercase d-block">Customer Name</small>
+                        <strong class="text-light fs-5">@Model.CustomerName</strong>
+                        <small class="text-info font-monospace d-block">@Model.AccountNumber</small>
+                    </div>
+                    <div class="col-6 text-end">
+                        <small class="text-muted text-uppercase d-block">Bill Number</small>
+                        <strong class="text-info font-monospace fs-5">@Model.BillNumber</strong>
+                        <div class="fs-4 text-warning fw-bold mt-1">Rs. @Model.AmountDue.ToString("N2")</div>
+                    </div>
+                </div>
+            </div>
+
+            <form asp-action="Collect" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input type="hidden" asp-for="BillNumber" />
+                <input type="hidden" asp-for="AccountNumber" />
+                <input type="hidden" asp-for="CustomerName" />
+                <input type="hidden" asp-for="AmountDue" />
+                <input type="hidden" asp-for="CollectorId" />
+
+                <div class="mb-3">
+                    <label asp-for="AmountToCollect" class="form-label text-light fw-semibold">Amount to Collect (Rs.)</label>
+                    <input asp-for="AmountToCollect" class="form-control bg-dark text-light border-secondary fs-4 font-monospace fw-bold" />
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label text-light fw-semibold">Select Collection Payment Method</label>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="form-check card p-3 bg-dark border-secondary">
+                                <input class="form-check-input" type="radio" asp-for="PaymentMethod" value="Cash" id="methodCash" checked onchange="togglePaymentMethod('Cash')" />
+                                <label class="form-check-label text-light fw-bold ms-2" for="methodCash">
+                                    <i class="bi bi-cash-stack text-success fs-4 me-2"></i> CASH Collection
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-check card p-3 bg-dark border-secondary">
+                                <input class="form-check-input" type="radio" asp-for="PaymentMethod" value="Card" id="methodCard" onchange="togglePaymentMethod('Card')" />
+                                <label class="form-check-label text-light fw-bold ms-2" for="methodCard">
+                                    <i class="bi bi-credit-card-2-front text-cyan fs-4 me-2"></i> CARD Collection
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CASH Panel -->
+                <div id="cashPanel" class="p-3 bg-dark border border-secondary rounded-3 mb-4">
+                    <h6 class="text-success fw-bold"><i class="bi bi-cash me-1"></i> Cash Tendered Calculator</h6>
+                    <div class="mb-2">
+                        <label asp-for="CashTendered" class="form-label text-muted small">Cash Given by Customer</label>
+                        <input asp-for="CashTendered" id="cashTenderedInput" class="form-control bg-secondary text-light font-monospace" oninput="calcChange()" />
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <span class="text-muted">Change to Return to Customer:</span>
+                        <strong id="changeDisplay" class="fs-4 text-success font-monospace">Rs. 0.00</strong>
+                    </div>
+                </div>
+
+                <!-- CARD Panel -->
+                <div id="cardPanel" class="p-3 bg-dark border border-secondary rounded-3 mb-4" style="display:none;">
+                    <h6 class="text-info fw-bold mb-3"><i class="bi bi-credit-card me-1"></i> Customer Card Swipe / Manual Entry</h6>
+                    <div class="mb-2">
+                        <label asp-for="CardHolderName" class="form-label text-muted small">Cardholder Name</label>
+                        <input asp-for="CardHolderName" class="form-control bg-secondary text-light" placeholder="@Model.CustomerName" />
+                    </div>
+                    <div class="mb-2">
+                        <label asp-for="CardNumber" class="form-label text-muted small">Card Number</label>
+                        <input asp-for="CardNumber" class="form-control bg-secondary text-light font-monospace" placeholder="e.g. 4532 7182 9384 1029" autocomplete="off" />
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <label asp-for="CardExpiry" class="form-label text-muted small">Expiry (MM/YY)</label>
+                            <input asp-for="CardExpiry" class="form-control bg-secondary text-light font-monospace text-center" placeholder="MM/YY" autocomplete="off" />
+                        </div>
+                        <div class="col-6">
+                            <label asp-for="CardCvc" class="form-label text-muted small">CVC Code</label>
+                            <input asp-for="CardCvc" type="password" maxlength="4" class="form-control bg-secondary text-light font-monospace text-center" placeholder="CVC" autocomplete="off" />
+                        </div>
+                    </div>
+                    <small class="text-muted d-block mt-2"><i class="bi bi-shield-check text-success"></i> If CARD is selected, it is processed and debited via Bank.Api during this collection step (Stage 1) before transfer.</small>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a asp-action="BillDetails" asp-route-accountNumber="@Model.AccountNumber" class="btn btn-outline-secondary">Back</a>
+                    <button type="submit" class="btn btn-tp-primary px-4 py-2">
+                        <i class="bi bi-check-circle me-1"></i> Confirm Collection &amp; Proceed to Transfer &rarr;
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function togglePaymentMethod(method) {
+            if (method === 'Cash') {
+                document.getElementById('cashPanel').style.display = 'block';
+                document.getElementById('cardPanel').style.display = 'none';
+            } else {
+                document.getElementById('cashPanel').style.display = 'none';
+                document.getElementById('cardPanel').style.display = 'block';
+            }
+        }
+
+        function calcChange() {
+            var collect = parseFloat(document.getElementById('AmountToCollect').value) || 0;
+            var tendered = parseFloat(document.getElementById('cashTenderedInput').value) || 0;
+            var change = tendered - collect;
+            if (change < 0) change = 0;
+            document.getElementById('changeDisplay').innerText = 'Rs. ' + change.toFixed(2);
+        }
+    </script>
+}

@@ -1,0 +1,142 @@
+@model NWSDB.Website.Models.ViewModels.CustomerDashboardDto
+@{
+    ViewData["Title"] = "Customer Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-speedometer2 text-info me-2"></i>Customer Dashboard</h2>
+        <p class="text-muted mb-0">Welcome back, <strong>@Model.Customer.Name</strong>! Overview of your water services.</p>
+    </div>
+    <a asp-controller="Bill" asp-action="CurrentBill" class="btn btn-nwsdb-primary">
+        <i class="bi bi-file-earmark-text me-1"></i> View Current Bill
+    </a>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="dashboard-stat-card">
+            <div class="stat-label">Account Number</div>
+            <div class="stat-value text-info font-monospace">@Model.Customer.AccountNumber</div>
+            <small class="text-muted">Phone: @Model.Customer.Phone</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-stat-card">
+            <div class="stat-label">Current Due Amount</div>
+            <div class="stat-value text-warning">
+                @if (Model.ActiveBill != null)
+                {
+                    <span>Rs. @Model.ActiveBill.DueAmount.ToString("N2")</span>
+                }
+                else
+                {
+                    <span>Rs. 0.00</span>
+                }
+            </div>
+            <small class="text-muted">
+                Status: 
+                @if (Model.ActiveBill?.Status == "Paid")
+                {
+                    <span class="badge-paid">Paid</span>
+                }
+                else if (Model.ActiveBill?.Status == "Partially Paid")
+                {
+                    <span class="badge bg-warning text-dark">Partially Paid</span>
+                }
+                else
+                {
+                    <span class="badge-pending">Pending</span>
+                }
+            </small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-stat-card">
+            <div class="stat-label">Total Payments Recorded</div>
+            <div class="stat-value text-success">
+                @Model.PaymentHistory.Count() <span class="fs-6 text-muted">Receipts</span>
+            </div>
+            <small class="text-muted">Last paid: @(Model.PaymentHistory.FirstOrDefault()?.PaymentDate.ToString("yyyy-MM-dd") ?? "None")</small>
+        </div>
+    </div>
+</div>
+
+<!-- Bill Quick Actions & Overview -->
+<div class="row g-4">
+    <div class="col-md-7">
+        <div class="glass-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0"><i class="bi bi-receipt-cutoff text-info me-2"></i>Active Billing Summary</h5>
+                @if (Model.ActiveBill != null && Model.ActiveBill.Status != "Paid")
+                {
+                    <a asp-controller="Payment" asp-action="PayCard" asp-route-billNumber="@Model.ActiveBill.BillNumber" class="btn btn-nwsdb-primary btn-sm">
+                        <i class="bi bi-credit-card-fill me-1"></i> Pay via Card
+                    </a>
+                }
+            </div>
+
+            @if (Model.ActiveBill != null)
+            {
+                <div class="table-responsive">
+                    <table class="table table-custom">
+                        <tbody>
+                            <tr>
+                                <td class="text-muted">Bill Number</td>
+                                <td class="fw-bold font-monospace text-info">@Model.ActiveBill.BillNumber</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Billing Month</td>
+                                <td>@Model.ActiveBill.BillingMonth</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Due Date</td>
+                                <td class="text-warning">@Model.ActiveBill.DueDate.ToString("MMMM dd, yyyy")</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Units Used</td>
+                                <td>@Model.ActiveBill.UnitsUsed Units</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Bill Amount</td>
+                                <td class="fs-5 fw-bold text-light">Rs. @Model.ActiveBill.BillAmount.ToString("N2")</td>
+                            </tr>
+                            @if (Model.ActiveBill.PaidAmount > 0)
+                            {
+                                <tr>
+                                    <td class="text-muted">Amount Paid</td>
+                                    <td class="text-success fw-bold">Rs. @Model.ActiveBill.PaidAmount.ToString("N2")</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Remaining Balance</td>
+                                    <td class="fs-4 text-warning fw-bold">Rs. @Model.ActiveBill.DueAmount.ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted my-3">No active pending bills available.</p>
+            }
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="glass-card">
+            <h5 class="fw-bold mb-3"><i class="bi bi-person-vcard text-info me-2"></i>Account Profile</h5>
+            <div class="d-flex flex-column gap-2 text-light">
+                <div><span class="text-muted">Customer Name:</span> <strong>@Model.Customer.Name</strong></div>
+                <div><span class="text-muted">Service Address:</span> @Model.Customer.Address</div>
+                <div><span class="text-muted">Phone:</span> @Model.Customer.Phone</div>
+                <div><span class="text-muted">Email:</span> @Model.Customer.Email</div>
+            </div>
+            <hr class="border-secondary my-3" />
+            <a asp-action="AccountDetails" class="btn btn-outline-info btn-sm w-100 rounded-pill">
+                View Full Account Details &rarr;
+            </a>
+        </div>
+    </div>
+</div>

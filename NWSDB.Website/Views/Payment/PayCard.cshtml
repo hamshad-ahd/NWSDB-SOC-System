@@ -1,0 +1,84 @@
+@model NWSDB.Website.Models.ViewModels.CardPaymentViewModel
+@{
+    ViewData["Title"] = "Pay Bill via Credit/Debit Card";
+}
+
+<div class="row justify-content-center my-4">
+    <div class="col-md-7">
+        <div class="glass-card">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary">
+                <div>
+                    <h3 class="fw-bold mb-0"><i class="bi bi-credit-card-2-front-fill text-info me-2"></i>NWSDB Direct Card Payment</h3>
+                    <small class="text-muted">Processed securely via Bank.Api Gateway Service</small>
+                </div>
+                <span class="badge bg-danger p-2"><i class="bi bi-lock-fill me-1"></i> CARD ONLY</span>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger rounded-3" role="alert">
+                    <i class="bi bi-exclamation-octagon-fill me-2"></i> @Model.ErrorMessage
+                </div>
+            }
+
+            <div class="p-3 border border-secondary rounded-3 bg-dark mb-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <small class="text-muted text-uppercase d-block">Bill Invoice Number</small>
+                        <strong class="font-monospace text-info fs-5">@Model.BillNumber</strong>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <small class="text-muted text-uppercase d-block">Amount Due for Payment</small>
+                        <strong class="text-warning fs-4">Rs. @Model.AmountToPay.ToString("N2")</strong>
+                    </div>
+                </div>
+            </div>
+
+            <form asp-action="PayCard" method="post">
+                <input type="hidden" asp-for="BillNumber" />
+                <input type="hidden" asp-for="AccountNumber" />
+                <input type="hidden" asp-for="CustomerName" />
+                <input type="hidden" asp-for="AmountToPay" />
+
+                <div class="mb-3">
+                    <label asp-for="CardHolderName" class="form-label text-light fw-semibold"></label>
+                    <input asp-for="CardHolderName" class="form-control bg-dark text-light border-secondary" placeholder="Name printed on card" />
+                    <span asp-validation-for="CardHolderName" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CardNumber" class="form-label text-light fw-semibold"></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-credit-card"></i></span>
+                        <input asp-for="CardNumber" class="form-control bg-dark text-light border-secondary font-monospace" placeholder="16-digit card number" />
+                    </div>
+                    <span asp-validation-for="CardNumber" class="text-danger small"></span>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="CardExpiry" class="form-label text-light fw-semibold"></label>
+                        <input asp-for="CardExpiry" class="form-control bg-dark text-light border-secondary text-center font-monospace" placeholder="MM/YY" />
+                        <span asp-validation-for="CardExpiry" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="CardCvc" class="form-label text-light fw-semibold"></label>
+                        <input asp-for="CardCvc" type="password" maxlength="4" class="form-control bg-dark text-light border-secondary text-center font-monospace" placeholder="3-digit CVC" />
+                        <span asp-validation-for="CardCvc" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="alert alert-info border-0 bg-dark text-info rounded-3 mb-4">
+                    <small><i class="bi bi-info-circle me-1"></i> Card payment will trigger a real-time HTTP REST call from <strong>NWSDB.Api</strong> to <strong>Bank.Api</strong> to validate card details and process account debit.</small>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a asp-controller="Bill" asp-action="CurrentBill" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-nwsdb-primary px-4 py-2">
+                        <i class="bi bi-shield-lock-fill me-2"></i> Authorize &amp; Pay Rs. @Model.AmountToPay.ToString("N2")
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

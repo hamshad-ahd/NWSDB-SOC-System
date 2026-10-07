@@ -1,0 +1,111 @@
+@model NWSDB.Website.Models.ViewModels.BillDto
+@{
+    ViewData["Title"] = "Current Bill Statement";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-9">
+        <div class="glass-card">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary">
+                <div>
+                    <h3 class="fw-bold mb-0"><i class="bi bi-file-earmark-text text-info me-2"></i>Water Bill Statement</h3>
+                    <small class="text-muted">National Water Supply &amp; Drainage Board Official Invoice</small>
+                </div>
+                <div class="text-end">
+                    <span class="font-monospace fs-5 text-info d-block fw-bold">@Model?.BillNumber</span>
+                    @if (Model?.Status == "Paid")
+                    {
+                        <span class="badge-paid">BILL PAID</span>
+                    }
+                    else if (Model?.Status == "Partially Paid")
+                    {
+                        <span class="badge bg-warning text-dark">PARTIALLY PAID</span>
+                    }
+                    else
+                    {
+                        <span class="badge-pending">PAYMENT DUE</span>
+                    }
+                </div>
+            </div>
+
+            @if (Model != null)
+            {
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted text-uppercase fw-bold">Customer Details</h6>
+                        <p class="mb-1"><strong>Account:</strong> @Model.Customer?.AccountNumber</p>
+                        <p class="mb-1"><strong>Name:</strong> @Model.Customer?.Name</p>
+                        <p class="mb-1"><strong>Address:</strong> @Model.Customer?.Address</p>
+                        <p class="mb-0"><strong>Phone #:</strong> @Model.Customer?.Phone</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <h6 class="text-muted text-uppercase fw-bold">Billing Metadata</h6>
+                        <p class="mb-1"><strong>Billing Month:</strong> @Model.BillingMonth</p>
+                        <p class="mb-1"><strong>Units Used:</strong> @Model.UnitsUsed Units</p>
+                        <p class="mb-0 text-warning"><strong>Due Date:</strong> @Model.DueDate.ToString("yyyy-MM-dd")</p>
+                    </div>
+                </div>
+
+                <!-- Reading breakdown table -->
+                <div class="table-responsive mb-4">
+                    <table class="table table-custom">
+                        <thead>
+                            <tr>
+                                <th>Item Description</th>
+                                <th class="text-center">Billing Month</th>
+                                <th class="text-center">Units Used</th>
+                                <th class="text-end">Total Bill Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Water Consumption &amp; Services Charge</td>
+                                <td class="text-center">@Model.BillingMonth</td>
+                                <td class="text-center fw-bold text-info">@Model.UnitsUsed Units</td>
+                                <td class="text-end fs-5 text-light">Rs. @Model.BillAmount.ToString("N2")</td>
+                            </tr>
+                            @if (Model.PaidAmount > 0)
+                            {
+                                <tr class="text-success">
+                                    <td colspan="3" class="text-end">Amount Paid to Date</td>
+                                    <td class="text-end">-Rs. @Model.PaidAmount.ToString("N2")</td>
+                                </tr>
+                                <tr class="fw-bold fs-4 text-warning">
+                                    <td colspan="3" class="text-end">Remaining Balance Due</td>
+                                    <td class="text-end">Rs. @Model.DueAmount.ToString("N2")</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr class="fw-bold fs-4 text-warning">
+                                    <td colspan="3" class="text-end">Total Amount Payable</td>
+                                    <td class="text-end text-info">Rs. @Model.BillAmount.ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Dashboard
+                    </a>
+                    @if (Model.Status != "Paid")
+                    {
+                        <a asp-controller="Payment" asp-action="PayCard" asp-route-billNumber="@Model.BillNumber" class="btn btn-nwsdb-primary px-4 py-2">
+                            <i class="bi bi-credit-card-fill me-2"></i> Pay Now via Credit / Debit Card (Card ONLY)
+                        </a>
+                    }
+                    else
+                    {
+                        <button class="btn btn-success disabled" disabled><i class="bi bi-check-circle-fill me-1"></i> Paid in Full</button>
+                    }
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">No bill statement found.</p>
+            }
+        </div>
+    </div>
+</div>

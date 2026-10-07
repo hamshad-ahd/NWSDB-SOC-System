@@ -1,0 +1,67 @@
+@model NWSDB.Website.Models.ViewModels.PaymentReceiptViewModel
+@{
+    ViewData["Title"] = "Official Payment Receipt";
+}
+
+<div class="row justify-content-center my-4">
+    <div class="col-md-7">
+        <div class="glass-card">
+            <div class="receipt-box">
+                <div class="text-center mb-4">
+                    <i class="bi bi-patch-check-fill text-success display-3"></i>
+                    <h3 class="fw-bold mt-2 text-success">Payment Successful!</h3>
+                    <p class="text-muted mb-0">National Water Supply &amp; Drainage Board Payment Confirmation</p>
+                </div>
+
+                <div class="border-top border-bottom border-secondary py-3 my-3">
+                    <div class="row mb-2">
+                        <span class="col-6 text-muted">Receipt Number:</span>
+                        <strong class="col-6 text-end font-monospace text-info fs-5">@Model.ReceiptNumber</strong>
+                    </div>
+                    <div class="row mb-2">
+                        <span class="col-6 text-muted">Bill Invoice #:</span>
+                        <strong class="col-6 text-end font-monospace">@Model.BillNumber</strong>
+                    </div>
+                    <div class="row mb-2">
+                        <span class="col-6 text-muted">Customer Account:</span>
+                        <span class="col-6 text-end fw-bold">@Model.CustomerName (@Model.AccountNumber)</span>
+                    </div>
+                    <div class="row mb-2">
+                        <span class="col-6 text-muted">Payment Channel:</span>
+                        <span class="col-6 text-end">@Model.Channel</span>
+                    </div>
+                    <div class="row mb-2">
+                        <span class="col-6 text-muted">Payment Method:</span>
+                        <span class="col-6 text-end fw-bold text-info">@Model.PaymentMethod</span>
+                    </div>
+                    <div class="row mb-2">
+                        <span class="col-6 text-muted">Bank Txn Ref:</span>
+                        <span class="col-6 text-end font-monospace small">@(Model.BankTransactionId ?? "N/A")</span>
+                    </div>
+                    <div class="row mb-2">
+                        <span class="col-6 text-muted">Paid Date &amp; Time:</span>
+                        <span class="col-6 text-end">@Model.PaidAt.ToString("yyyy-MM-dd HH:mm:ss")</span>
+                    </div>
+                    <hr class="border-secondary" />
+                    <div class="row fs-4 fw-bold">
+                        <span class="col-6 text-light">Amount Paid:</span>
+                        <strong class="col-6 text-end text-success">Rs. @Model.AmountPaid.ToString("N2")</strong>
+                    </div>
+                    <div class="row text-muted small mt-1">
+                        <span class="col-6">Remaining Bill Balance:</span>
+                        <span class="col-6 text-end">Rs. @Model.RemainingBillBalance.ToString("N2") (@Model.BillStatus)</span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-4 no-print">
+                    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-house me-1"></i> Back to Dashboard
+                    </a>
+                    <button onclick="window.print()" class="btn btn-nwsdb-primary">
+                        <i class="bi bi-printer-fill me-2"></i> Print Official Receipt
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

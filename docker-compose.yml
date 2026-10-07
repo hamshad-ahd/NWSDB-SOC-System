@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  bank-api:
+    container_name: bank-api
+    build:
+      context: .
+      dockerfile: Bank.Api/Dockerfile
+    ports:
+      - "5001:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__BankDatabase=Data Source=Bank.db
+    restart: unless-stopped
+    networks:
+      - nwsdb-soc-network
+
+  nwsdb-api:
+    container_name: nwsdb-api
+    build:
+      context: .
+      dockerfile: NWSDB.Api/Dockerfile
+    ports:
+      - "5002:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__NwsdbDatabase=Data Source=NWSDB.db
+      - BankApiUrl=http://bank-api:8080/
+    depends_on:
+      - bank-api
+    restart: unless-stopped
+    networks:
+      - nwsdb-soc-network
+
+  nwsdb-website:
+    container_name: nwsdb-website
+    build:
+      context: .
+      dockerfile: NWSDB.Website/Dockerfile
+    ports:
+      - "5003:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - NwsdbApiUrl=http://nwsdb-api:8080/
+    depends_on:
+      - nwsdb-api
+    restart: unless-stopped
+    networks:
+      - nwsdb-soc-network
+
+  thirdparty-webapp:
+    container_name: thirdparty-webapp
+    build:
+      context: .
+      dockerfile: ThirdParty.WebApp/Dockerfile
+    ports:
+      - "5004:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - NwsdbApiUrl=http://nwsdb-api:8080/
+    depends_on:
+      - nwsdb-api
+    restart: unless-stopped
+    networks:
+      - nwsdb-soc-network
+
+networks:
+  nwsdb-soc-network:
+    driver: bridge

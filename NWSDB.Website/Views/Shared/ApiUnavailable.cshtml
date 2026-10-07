@@ -1,0 +1,52 @@
+@{
+    ViewData["Title"] = "NWSDB API Unavailable";
+    var errorMsg = ViewBag.ErrorMessage as string ?? "Unable to communicate with NWSDB Core REST API.";
+}
+
+<div class="row justify-content-center my-5">
+    <div class="col-md-8">
+        <div class="glass-card shadow-lg p-4 border border-danger">
+            <div class="d-flex align-items-center mb-3">
+                <i class="bi bi-exclamation-triangle-fill text-danger display-5 me-3"></i>
+                <div>
+                    <h3 class="fw-bold text-danger mb-1">NWSDB API Connection Error</h3>
+                    <p class="text-muted mb-0">The Customer Portal could not reach the NWSDB Core REST API service.</p>
+                </div>
+            </div>
+
+            <div class="alert alert-danger rounded-3 my-3" role="alert">
+                <i class="bi bi-x-circle me-2"></i><strong>Error Detail:</strong> @errorMsg
+            </div>
+
+            <div class="p-3 bg-dark border border-secondary rounded-3 mb-4">
+                <h6 class="text-info fw-bold mb-2"><i class="bi bi-tools me-2"></i>Development Troubleshooting Instructions:</h6>
+                <ol class="text-light small mb-0 ps-3">
+                    <li class="mb-1">Ensure the <strong>NWSDB.Api</strong> project is running on port <code>5002</code>:
+                        <div class="mt-1 font-monospace bg-black p-2 rounded text-warning">
+                            dotnet run --project NWSDB.Api --urls "http://localhost:5002"
+                        </div>
+                    </li>
+                    <li class="mb-1">Check that <code>appsettings.json</code> in <strong>NWSDB.Website</strong> specifies:
+                        <div class="mt-1 font-monospace bg-black p-2 rounded text-info">
+                            "NwsdbApi": { "BaseUrl": "http://localhost:5002" }
+                        </div>
+                    </li>
+                    <li class="mb-0">Verify the API health check or Swagger documentation at:
+                        <div class="mt-1 font-monospace bg-black p-2 rounded">
+                            <a href="http://localhost:5002/swagger" target="_blank" class="text-info">http://localhost:5002/swagger</a>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="d-flex gap-2 justify-content-end">
+                <a href="javascript:location.reload()" class="btn btn-nwsdb-primary px-4">
+                    <i class="bi bi-arrow-clockwise me-1"></i> Retry Connection
+                </a>
+                <a asp-controller="Auth" asp-action="Login" class="btn btn-outline-secondary">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Back to Login
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

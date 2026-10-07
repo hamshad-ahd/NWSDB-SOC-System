@@ -1,0 +1,65 @@
+@model IEnumerable<NWSDB.Website.Models.ViewModels.WaterUsageDto>
+@{
+    ViewData["Title"] = "Water Usage Consumption History";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-primary mb-1"><i class="bi bi-bar-chart-line-fill me-2"></i>Water Usage History</h2>
+            <p class="text-muted">Monthly consumption summary measured in units (1 Unit = 1,000 Liters).</p>
+        </div>
+        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-light py-3 border-0 rounded-top-4">
+                    <h5 class="fw-bold text-dark mb-0">Monthly Breakdown</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Month / Year</th>
+                                    <th>Reading Date</th>
+                                    <th class="text-end">Units Consumed (Units)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model != null && Model.Any())
+                                {
+                                    @foreach (var u in Model)
+                                    {
+                                        <tr>
+                                            <td class="fw-semibold">@u.MonthYear</td>
+                                            <td>@u.ReadingDate.ToString("yyyy-MM-dd")</td>
+                                            <td class="text-end fw-bold text-primary">@u.UnitsConsumed Units</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="3" class="text-center py-4 text-muted">No usage history records found.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 bg-primary text-white p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>Conservation Tip</h5>
+                <p class="mb-0">Average household water consumption is approximately 25-30 units monthly. Conserving water reduces your bill and helps protect water sources across Sri Lanka!</p>
+            </div>
+        </div>
+    </div>
+</div>

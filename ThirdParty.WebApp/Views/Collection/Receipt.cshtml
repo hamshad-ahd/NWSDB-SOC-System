@@ -1,0 +1,93 @@
+@model ThirdParty.WebApp.Models.ViewModels.SettlementReceiptViewModel
+@{
+    ViewData["Title"] = "Transfer Settlement Receipt";
+}
+
+<!-- Workflow Pipeline -->
+<div class="pipeline-steps">
+    <div class="step-item completed">
+        <span class="step-number"><i class="bi bi-check"></i></span>
+        <span>Search Customer</span>
+    </div>
+    <div class="step-item completed">
+        <span class="step-number"><i class="bi bi-check"></i></span>
+        <span>Verify Bill</span>
+    </div>
+    <div class="step-item completed">
+        <span class="step-number"><i class="bi bi-check"></i></span>
+        <span>Collect Cash / Card</span>
+    </div>
+    <div class="step-item completed">
+        <span class="step-number"><i class="bi bi-check"></i></span>
+        <span>Settlement Complete</span>
+    </div>
+</div>
+
+<div class="row justify-content-center my-4">
+    <div class="col-md-7">
+        <div class="agent-card">
+            <div class="text-center mb-4">
+                <i class="bi bi-building-check text-success display-3"></i>
+                <h3 class="fw-bold mt-2 text-success">Collection Transferred to NWSDB!</h3>
+                <p class="text-muted mb-0">Official Third-Party Collection &amp; Settlement Receipt</p>
+            </div>
+
+            <div class="p-4 bg-dark border border-success rounded-3 mb-4">
+                <div class="row mb-2">
+                    <span class="col-6 text-muted">NWSDB Receipt Number:</span>
+                    <strong class="col-6 text-end font-monospace text-info fs-5">@Model.ReceiptNumber</strong>
+                </div>
+                <div class="row mb-2">
+                    <span class="col-6 text-muted">Transfer Reference:</span>
+                    <strong class="col-6 text-end font-monospace text-warning">@(string.IsNullOrEmpty(Model.TransferReference) ? "TRF-TP-SETTLED" : Model.TransferReference)</strong>
+                </div>
+                <div class="row mb-2">
+                    <span class="col-6 text-muted">Transfer Status:</span>
+                    <span class="col-6 text-end"><span class="badge bg-success text-white">Transferred</span></span>
+                </div>
+                <div class="row mb-2">
+                    <span class="col-6 text-muted">Bill Statement #:</span>
+                    <strong class="col-6 text-end font-monospace">@Model.BillNumber</strong>
+                </div>
+                <div class="row mb-2">
+                    <span class="col-6 text-muted">Customer Name:</span>
+                    <span class="col-6 text-end fw-bold">@Model.CustomerName (@Model.AccountNumber)</span>
+                </div>
+                <div class="row mb-2">
+                    <span class="col-6 text-muted">Collection Method:</span>
+                    <span class="col-6 text-end fw-bold text-info">@Model.PaymentMethod</span>
+                </div>
+                <div class="row mb-2">
+                    <span class="col-6 text-muted">Settlement Channel:</span>
+                    <span class="col-6 text-end">@Model.Channel</span>
+                </div>
+                <div class="row mb-2">
+                    <span class="col-6 text-muted">Bank Txn Ref:</span>
+                    <span class="col-6 text-end font-monospace small">@(Model.BankTransactionId ?? "N/A (Cash)")</span>
+                </div>
+                <div class="row mb-2">
+                    <span class="col-6 text-muted">Transfer Timestamp:</span>
+                    <span class="col-6 text-end">@Model.PaidAt.ToString("yyyy-MM-dd HH:mm:ss")</span>
+                </div>
+                <hr class="border-secondary" />
+                <div class="row fs-4 fw-bold">
+                    <span class="col-6 text-light">Transferred Amount:</span>
+                    <strong class="col-6 text-end text-success">Rs. @Model.AmountPaid.ToString("N2")</strong>
+                </div>
+                <div class="row text-muted small mt-1">
+                    <span class="col-6">NWSDB Bill Status:</span>
+                    <span class="col-6 text-end fw-bold text-success">@Model.BillStatus (Balance: Rs. @Model.RemainingBillBalance.ToString("N2"))</span>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <a asp-action="Lookup" class="btn btn-tp-primary">
+                    <i class="bi bi-plus-circle me-1"></i> Collect Another Customer Payment
+                </a>
+                <button onclick="window.print()" class="btn btn-outline-light">
+                    <i class="bi bi-printer me-1"></i> Print Receipt
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

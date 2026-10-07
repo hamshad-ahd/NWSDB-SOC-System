@@ -1,0 +1,60 @@
+@model IEnumerable<NWSDB.Website.Models.ViewModels.PaymentRecordDto>
+@{
+    ViewData["Title"] = "Payment History & Receipts";
+}
+
+<div class="glass-card">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-0"><i class="bi bi-clock-history text-info me-2"></i>Payment History &amp; Receipts</h3>
+            <p class="text-muted mb-0">Record of all successful bill settlements across channels.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i> Dashboard</a>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>Receipt Number</th>
+                        <th>Payment Date &amp; Time</th>
+                        <th>Method</th>
+                        <th>Status</th>
+                        <th class="text-end">Amount Paid</th>
+                        <th>Bank Txn Ref</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold font-monospace text-info">@item.ReceiptNumber</td>
+                            <td class="text-muted">@item.PaymentDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                            <td>
+                                @if (item.PaymentMethod == "Card")
+                                {
+                                    <span class="badge bg-info text-dark"><i class="bi bi-credit-card-fill me-1"></i> Card</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success"><i class="bi bi-cash me-1"></i> Cash</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge bg-success">@item.Status</span>
+                            </td>
+                            <td class="text-end fw-bold text-light fs-5">Rs. @item.Amount.ToString("N2")</td>
+                            <td class="font-monospace small text-muted">@(item.TransactionId ?? "N/A")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted">No past payment receipts available.</p>
+    }
+</div>

@@ -1,0 +1,69 @@
+@model ThirdParty.WebApp.Models.ViewModels.CustomerLookupViewModel
+@{
+    ViewData["Title"] = "Customer Search & Verification";
+}
+
+<!-- Workflow Pipeline -->
+<div class="pipeline-steps">
+    <div class="step-item active">
+        <span class="step-number">1</span>
+        <span>Search Customer</span>
+    </div>
+    <div class="step-item">
+        <span class="step-number">2</span>
+        <span>Verify Bill</span>
+    </div>
+    <div class="step-item">
+        <span class="step-number">3</span>
+        <span>Collect Cash / Card</span>
+    </div>
+    <div class="step-item">
+        <span class="step-number">4</span>
+        <span>Transfer to NWSDB</span>
+    </div>
+</div>
+
+<div class="row justify-content-center my-4">
+    <div class="col-md-6">
+        <div class="agent-card">
+            <div class="text-center mb-4">
+                <i class="bi bi-search-heart text-info display-4"></i>
+                <h3 class="fw-bold mt-2">NWSDB Customer Verification</h3>
+                <p class="text-muted small">Enter NWSDB Customer Account Number or Meter Number to fetch active bills</p>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model?.ErrorMessage))
+            {
+                <div class="alert alert-danger rounded-3" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> @Model.ErrorMessage
+                </div>
+            }
+
+            <form asp-action="Lookup" method="post">
+                <div class="mb-4">
+                    <label asp-for="SearchTerm" class="form-label text-light fw-semibold"></label>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-dark border-secondary text-info"><i class="bi bi-card-text"></i></span>
+                        <input asp-for="SearchTerm" class="form-control bg-dark text-light border-secondary font-monospace" placeholder="Account (NWSDB-1001) or Meter (MTR-88219)" />
+                    </div>
+                    <span asp-validation-for="SearchTerm" class="text-danger small"></span>
+                </div>
+
+                <button type="submit" class="btn btn-tp-primary w-100 py-3 fs-5">
+                    <i class="bi bi-person-check-fill me-2"></i> Search &amp; Fetch Bill Statement
+                </button>
+            </form>
+
+            <div class="mt-4 pt-3 border-top border-secondary">
+                <small class="text-muted d-block mb-2">Seeded Test Customer Accounts:</small>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm font-monospace" onclick="document.getElementById('SearchTerm').value='NWSDB-1001'">NWSDB-1001 (Kavindu)</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm font-monospace" onclick="document.getElementById('SearchTerm').value='NWSDB-1002'">NWSDB-1002 (Nimali)</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm font-monospace" onclick="document.getElementById('SearchTerm').value='NWSDB-1003'">NWSDB-1003 (Saman)</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm font-monospace" onclick="document.getElementById('SearchTerm').value='NWSDB-1004'">NWSDB-1004 (Dilani)</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm font-monospace" onclick="document.getElementById('SearchTerm').value='NWSDB-1005'">NWSDB-1005 (Ruwan)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

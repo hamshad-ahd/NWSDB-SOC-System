@@ -1,0 +1,39 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# .NET build output
+bin/
+obj/
+
+# Test results
+TestResults/
+*.trx
+
+# User-specific files
+*.userprefs
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Local databases
+*.db
+*.db-shm
+*.db-wal
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Publish output
+publish/
+wwwroot/uploads/
+
+# Docker local overrides
+docker-compose.override.yml

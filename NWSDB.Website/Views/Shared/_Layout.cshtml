@@ -1,0 +1,82 @@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    var accountNumber = HttpContextAccessor.HttpContext?.Session.GetString("AccountNumber");
+    var customerName = HttpContextAccessor.HttpContext?.Session.GetString("CustomerName");
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - NWSDB Customer Portal</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-nwsdb">
+            <div class="container">
+                <a class="navbar-brand" asp-controller="Dashboard" asp-action="Index">
+                    <i class="bi bi-droplet-fill text-info fs-4"></i>
+                    NWSDB Portal
+                    <span class="brand-badge">CUSTOMER</span>
+                </a>
+                <button class="navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    @if (!string.IsNullOrEmpty(accountNumber))
+                    {
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Dashboard" asp-action="Index"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Bill" asp-action="CurrentBill"><i class="bi bi-receipt me-1"></i> Current Bill</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Bill" asp-action="History"><i class="bi bi-file-earmark-spreadsheet me-1"></i> Bill History</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Dashboard" asp-action="Usage"><i class="bi bi-bar-chart-line me-1"></i> Water Usage</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Dashboard" asp-action="PaymentHistory"><i class="bi bi-clock-history me-1"></i> Payment History</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Dashboard" asp-action="AccountDetails"><i class="bi bi-person-badge me-1"></i> Account Profile</a>
+                            </li>
+                        </ul>
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="text-light small"><i class="bi bi-person-circle text-info"></i> @customerName (@accountNumber)</span>
+                            <a class="btn btn-outline-danger btn-sm rounded-pill" asp-controller="Auth" asp-action="Logout">Logout</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="ms-auto">
+                            <a class="btn btn-nwsdb-primary btn-sm" asp-controller="Auth" asp-action="Login">Customer Login</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main" class="container my-4 flex-grow-1">
+        @RenderBody()
+    </main>
+
+    <footer>
+        <div class="container text-center">
+            <p class="mb-1">&copy; 2026 National Water Supply and Drainage Board (NWSDB) — Service Oriented Computing Assignment</p>
+            <small class="text-muted">Powered by ASP.NET Core &amp; Bank Integration REST API</small>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

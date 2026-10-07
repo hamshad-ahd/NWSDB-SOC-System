@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thirdparty-webapp-deployment
+  labels:
+    app: thirdparty-webapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: thirdparty-webapp
+  template:
+    metadata:
+      labels:
+        app: thirdparty-webapp
+    spec:
+      containers:
+      - name: thirdparty-webapp
+        image: nwsdb-thirdparty-webapp:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Production"
+        - name: ASPNETCORE_URLS
+          value: "http://+:8080"
+        - name: NwsdbApiUrl
+          value: "http://nwsdb-api:8080/"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: thirdparty-webapp
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 5004
+    targetPort: 8080
+  selector:
+    app: thirdparty-webapp

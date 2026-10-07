@@ -1,0 +1,169 @@
+@model ThirdParty.WebApp.Models.ViewModels.CustomerBillDetailsViewModel
+@{
+    ViewData["Title"] = "Customer Bill Statement Verification";
+    var customer = Model.Customer;
+}
+
+<!-- Workflow Pipeline -->
+<div class="pipeline-steps">
+    <div class="step-item completed">
+        <span class="step-number"><i class="bi bi-check"></i></span>
+        <span>Search Customer</span>
+    </div>
+    <div class="step-item active">
+        <span class="step-number">2</span>
+        <span>Verify Bill</span>
+    </div>
+    <div class="step-item">
+        <span class="step-number">3</span>
+        <span>Collect Cash / Card</span>
+    </div>
+    <div class="step-item">
+        <span class="step-number">4</span>
+        <span>Transfer to NWSDB</span>
+    </div>
+</div>
+
+<div class="row justify-content-center my-4">
+    <div class="col-md-9">
+        <div class="agent-card">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary">
+                <div>
+                    <h3 class="fw-bold mb-0"><i class="bi bi-person-check-fill text-info me-2"></i>Verified Customer Profile</h3>
+                    <small class="text-muted">NWSDB Real-time Customer Records</small>
+                </div>
+                <span class="badge bg-info p-2 font-monospace fs-6">@customer?.AccountNumber</span>
+            </div>
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-warning rounded-3 mb-4">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+                </div>
+            }
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="p-3 bg-dark border border-secondary rounded-3">
+                        <small class="text-muted d-block text-uppercase">Customer Full Name</small>
+                        <strong class="fs-5 text-light">@customer?.Name</strong>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-dark border border-secondary rounded-3">
+                        <small class="text-muted d-block text-uppercase">Phone Number</small>
+                        <strong class="fs-5 text-info font-monospace">@customer?.Phone</strong>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="p-3 bg-dark border border-secondary rounded-3">
+                        <small class="text-muted d-block text-uppercase">Registered Service Address</small>
+                        <span class="text-light">@customer?.Address</span>
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.ActiveBill != null && Model.ActiveBill.DueAmount > 0)
+            {
+                <div class="border border-info rounded-3 p-3 bg-dark mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold text-info mb-0"><i class="bi bi-receipt me-2"></i>Current Outstanding Statement</h5>
+                        <span class="badge bg-warning text-dark font-monospace">@Model.ActiveBill.Status</span>
+                    </div>
+                    <div class="row text-light">
+                        <div class="col-md-6 mb-2">
+                            <span class="text-muted">Bill Number:</span> <strong class="font-monospace text-info">@Model.ActiveBill.BillNumber</strong>
+                        </div>
+                        <div class="col-md-6 mb-2 text-md-end">
+                            <span class="text-muted">Billing Month:</span> <span>@Model.ActiveBill.BillingMonth</span>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <span class="text-muted">Units Used:</span> <span>@Model.ActiveBill.UnitsUsed Units</span>
+                        </div>
+                        <div class="col-md-6 mb-2 text-md-end">
+                            <span class="text-muted">Due Date:</span> <span class="text-warning">@Model.ActiveBill.DueDate.ToString("yyyy-MM-dd")</span>
+                        </div>
+                        <hr class="border-secondary my-2" />
+                        <div class="col-md-6 fs-4 fw-bold">
+                            <span>Amount Payable:</span>
+                        </div>
+                        <div class="col-md-6 text-md-end fs-3 fw-bold text-warning">
+                            Rs. @Model.ActiveBill.DueAmount.ToString("N2")
+                        </div>
+                    </div>
+                    <div class="text-end mt-3">
+                        <a asp-action="Collect" asp-route-billNumber="@Model.ActiveBill.BillNumber" class="btn btn-tp-primary px-4 py-2">
+                            Proceed to Collect Payment &rarr;
+                        </a>
+                    </div>
+                </div>
+            }
+            else if (Model.ActiveBill != null && Model.ActiveBill.DueAmount <= 0)
+            {
+                <div class="alert alert-success rounded-3 my-3">
+                    <i class="bi bi-check-circle-fill me-2"></i> Current statement (@Model.ActiveBill.BillNumber) is fully settled!
+                </div>
+            }
+
+            @if (Model.AllBills != null && Model.AllBills.Count > 0)
+            {
+                <div class="mt-4">
+                    <h5 class="fw-bold text-light mb-3"><i class="bi bi-files me-2"></i>All Invoices for @customer?.AccountNumber</h5>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover border-secondary rounded-3">
+                            <thead>
+                                <tr class="text-muted small">
+                                    <th>Bill #</th>
+                                    <th>Month</th>
+                                    <th>Total Bill</th>
+                                    <th>Paid</th>
+                                    <th>Balance Due</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var b in Model.AllBills)
+                                {
+                                    <tr>
+                                        <td class="font-monospace text-info">@b.BillNumber</td>
+                                        <td>@b.BillingMonth</td>
+                                        <td>Rs. @b.BillAmount.ToString("N2")</td>
+                                        <td class="text-success">Rs. @b.PaidAmount.ToString("N2")</td>
+                                        <td class="text-warning fw-bold">Rs. @b.DueAmount.ToString("N2")</td>
+                                        <td>
+                                            @if (b.DueAmount <= 0)
+                                            {
+                                                <span class="badge bg-success">Paid</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning text-dark">@b.Status</span>
+                                            }
+                                        </td>
+                                        <td class="text-end">
+                                            @if (b.DueAmount > 0)
+                                            {
+                                                <a asp-action="Collect" asp-route-billNumber="@b.BillNumber" class="btn btn-outline-info btn-sm">
+                                                    Collect &rarr;
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted small">Settled</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+
+            <div class="d-flex justify-content-between mt-4">
+                <a asp-action="Lookup" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i> Back to Search</a>
+            </div>
+        </div>
+    </div>
+</div>
